@@ -1,16 +1,22 @@
-const express = require('express');
-const app = express();
-
 require('dotenv').config({quiet:true});
 
+
+const app = require("./src/app");
 const connectDB = require('./src/config/db');
 
-connectDB();
+const PORT = process.env.PORT || 3000;
 
-app.get("/",(req,res)=>{
-    res.send("This is home page");
-});
+const startServer = async () => {
+    try {
+        await connectDB();
 
-app.listen(3000,()=>{
-    console.log("Server is listening at port http://localhost:3000");
-})
+        app.listen(PORT, () => {
+            console.log(`Server is listening at http://localhost:${PORT}`);
+        });
+    } catch (error) {
+        console.error('Server startup failed:', error.message);
+        process.exit(1);
+    }
+};
+
+startServer();
