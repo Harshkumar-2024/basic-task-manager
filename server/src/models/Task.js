@@ -19,7 +19,7 @@ const taskSchema = mongoose.Schema(
         },
         status:{
             type:String,
-            enum:["not started","in progress","complted"],
+            enum:["not started","in progress","completed"],
             required:[true,"Task status is required"],
             default:'not started',
         },

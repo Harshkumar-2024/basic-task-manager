@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser');
 const authMiddleware = require('./middleware/authMiddleware');
 
 const UserRoutes = require('./routes/authRoutes');
-
+const taskRoutes = require('./routes/taskRoutes');
 
 
 // Middleware to parse JSON request bodies
@@ -23,6 +23,7 @@ app.get('/',(req,res)=>{
 
 // Routes
 app.use('/auth',UserRoutes);
+app.use('/tasks',authMiddleware,taskRoutes);
 
 app.get('/auth/me', authMiddleware, (req, res) => {
     res.status(200).json({

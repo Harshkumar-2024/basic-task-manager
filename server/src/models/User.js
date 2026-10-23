@@ -23,7 +23,7 @@ const userSchema = mongoose.Schema(
         type:String,
         default:'/default.jpg',
     },
-    task:[
+    tasks:[
         {
             type:mongoose.Schema.Types.ObjectId,
             ref:'Task',
