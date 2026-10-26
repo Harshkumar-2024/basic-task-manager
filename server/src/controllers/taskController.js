@@ -2,6 +2,9 @@ const Task = require('../models/Task');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 
+const parseDueDate = require('../utils/parseDueDate');
+const { DateTime } = require('luxon');
+
 // create a new task
 const createTask = async(req,res)=>{
     try{
@@ -46,18 +49,18 @@ const createTask = async(req,res)=>{
             });
         }
 
-         //  Validate due date if provided
-        let parsedDueDate;
+        // Parse due date using the client's timezone
+        const timezone = req.get('X-Timezone') || 'UTC';
 
-        if (dueDate !== undefined && dueDate !== null && dueDate !== '') {
-            parsedDueDate = new Date(dueDate);
+        const result = parseDueDate(dueDate, timezone);
 
-            if (Number.isNaN(parsedDueDate.getTime())) {
-                return res.status(400).json({
-                    message: 'Invalid due date',
-                });
-            }
+        if (!result.valid) {
+            return res.status(400).json({
+                message: result.message || 'Invalid due date',
+            });
         }
+
+        const parsedDueDate = result.date;
 
         // Create the task for the logged-in user
         const task = await Task.create({
@@ -192,26 +195,19 @@ const updateTask = async (req, res) => {
         }
 
         if (dueDate !== undefined) {
-            if (dueDate === null || dueDate === '') {
-                task.dueDate = null;
-            } else {
-                if (typeof dueDate !== 'string') {
-                    return res.status(400).json({
-                        message: 'Due date must be a string or null',
-                    });
-                }
+            const timezone = req.get('X-Timezone') || 'UTC';
 
-                const parsedDueDate = new Date(dueDate);
+            const result = parseDueDate(dueDate, timezone);
 
-                if (Number.isNaN(parsedDueDate.getTime())) {
-                    return res.status(400).json({
-                        message: 'Invalid due date',
-                    });
-                }
-
-                task.dueDate = parsedDueDate;
+            if (!result.valid) {
+                return res.status(400).json({
+                    message: result.message || 'Invalid due date',
+                });
             }
+
+            task.dueDate = result.date;
         }
+
 
         // Save the changes
         await task.save();
@@ -277,9 +273,99 @@ const deleteTask = async(req,res)=>{
 // Get all tasks belonging to the logged user
 const getTasks = async (req,res)=>{
     try{
-        const tasks = await Task.find({
+        const {status,priority,dueDate} = req.query;
+        const timezone = req.get('X-Timezone') || 'UTC';
+
+        //validate timezone
+        const now = DateTime.now().setZone(timezone);
+
+        if(!now.isValid){
+            return res.status(400).json({message:'Invalid timezone',});
+        }
+
+        // Start by fetching only the logged in user's tasks
+        const filter = {
             user:req.user._id,
-        }).sort({createdAt:-1});
+        };
+
+        if(status){
+            const allowedStatuses = ['not started','in progress','completed'];
+
+            if(!allowedStatuses.includes(status)){
+                return res.status(400).json({
+                    message:'Invalid status value',
+                    allowedValues:allowedStatuses,
+                });
+            }
+
+            filter.status = status;
+
+        }
+
+         // Validate and apply priority filter
+        if (priority) {
+            const allowedPriorities = ['low', 'med', 'high'];
+
+            if (!allowedPriorities.includes(priority)) {
+                return res.status(400).json({
+                message: 'Invalid priority value',
+                allowedValues: allowedPriorities,
+                });
+            }
+
+            filter.priority = priority;
+        }
+
+        // Filter by due date
+        if(dueDate !== undefined){
+            const allowedDueDateFilters = ['overdue','today','upcoming','none',];
+
+            if(!allowedDueDateFilters.includes(dueDate)){
+                return res.status(400).json({
+                    message:'Invalid dueDate filter',
+                    allowedValues:allowedDueDateFilters,
+                });
+            }
+
+            const startOfToday = now.startOf('day').toUTC().toJSDate();
+
+            const startOfTomorrow = now.startOf('day').plus({day:1}).toUTC().toJSDate();
+
+            if (dueDate === 'none') {
+                filter.$or = [
+                    { dueDate: null },
+                    { dueDate: { $exists: false } },
+                ];
+            }
+
+            if (dueDate === 'today') {
+                filter.dueDate = {
+                    $gte: startOfToday,
+                    $lt: startOfTomorrow,
+                };
+            }
+
+            if (dueDate === 'upcoming') {
+                filter.dueDate = {
+                    $gte: startOfTomorrow,
+                };
+            }
+
+            if (dueDate === 'overdue') {
+                filter.dueDate = {
+                    $lt: startOfToday,
+                    $ne: null,
+                };
+
+                filter.status = {...(filter.status ? {$eq:filter.status }:{}), $ne:'completed', };
+            
+            }
+        
+        }
+
+        const tasks = await Task.find(filter).sort({
+            createdAt:-1,
+        });
 
         return res.status(200).json({
             message:'Tasks fetched successfully',
@@ -289,6 +375,7 @@ const getTasks = async (req,res)=>{
 
     }catch(error){
         console.log('Get tasks error:',error.message);
+
         return res.status(500).json({
             message:'Something went wrong',
         });

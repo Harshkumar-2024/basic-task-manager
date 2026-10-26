@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
+const path = require('path');
 
 const authMiddleware = require('./middleware/authMiddleware');
 
-const UserRoutes = require('./routes/authRoutes');
+const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 
 // Middleware to parse JSON request bodies
@@ -17,13 +19,16 @@ app.use(express.urlencoded({ extended: true }));
 // cookie parser
 app.use(cookieParser());
 
+app.use('/uploads',express.static(path.join(__dirname,'../uploads')))
+
 app.get('/',(req,res)=>{
     res.send('Basic Task Manager API is running');
 });
 
 // Routes
-app.use('/auth',UserRoutes);
+app.use('/auth',authRoutes);
 app.use('/tasks',authMiddleware,taskRoutes);
+app.use('/users',authMiddleware,userRoutes);
 
 app.get('/auth/me', authMiddleware, (req, res) => {
     res.status(200).json({

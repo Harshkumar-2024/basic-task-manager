@@ -2,6 +2,8 @@ node_modules
 
 .env
 
+uploads
+
 Editor and operating system files
 
 .vscode/
