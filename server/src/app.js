@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
 const path = require('path');
+const cors = require('cors');
 
 const authMiddleware = require('./middleware/authMiddleware');
 
@@ -9,6 +10,10 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
 
+app.use(cors({
+    origin:'http://localhost:5173',
+    credentials:true,
+}));
 
 // Middleware to parse JSON request bodies
 app.use(express.json());
@@ -30,15 +35,15 @@ app.use('/auth',authRoutes);
 app.use('/tasks',authMiddleware,taskRoutes);
 app.use('/users',authMiddleware,userRoutes);
 
-app.get('/auth/me', authMiddleware, (req, res) => {
-    res.status(200).json({
-        message: 'Authenticated successfully',
-        user: {
-            id: req.user._id,
-            fullname: req.user.fullname,
-            email: req.user.email,
-        },
-    });
-});
+// app.get('/auth/me', authMiddleware, (req, res) => {
+//     res.status(200).json({
+//         message: 'Authenticated successfully',
+//         user: {
+//             id: req.user._id,
+//             fullname: req.user.fullname,
+//             email: req.user.email,
+//         },
+//     });
+// });
 
 module.exports = app;

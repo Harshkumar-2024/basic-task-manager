@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import {Link, useNavigate } from 'react-router-dom'
 import {useAuth} from '../context/AuthContext'
+import {Eye,EyeOff} from 'lucide-react'
 
 const Login = () => {
 
@@ -11,10 +12,9 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState("");
 
-  const auth = useAuth();
-  console.log(auth);
-
   const {login} = useAuth();
+
+  const [showPassword,setShowPassword] = useState(false);
 
   const handleSubmit = async (e) =>{
     e.preventDefault();
@@ -63,9 +63,17 @@ const Login = () => {
           <input type="email" name='email' placeholder='xyz@gmail.com' value={email} onChange={handleChange} required
           className='border-1 border-gray-500 rounded-md h-[40px] px-2'/>
           <h3 className='font-semibold'>Password</h3>
-          <input type="password" name='password' placeholder='Minimum 8 characters' value={password} onChange={handleChange} required
-          className='border-1 border-gray-500 rounded-md h-[40px] px-2'/>
+          <div className="relative">
+            <input type={showPassword?'text':'password'} name='password' placeholder='Minimum 8 characters' value={password} onChange={handleChange} required
+            className='border-1 border-gray-500 rounded-md h-[40px] px-2 w-full pr-10'/>
+            <button type='button' 
+            onClick={()=>setShowPassword(!showPassword)}
+            className='absolute right-3 top-1/2 -translate-y-1/2'
+            >{showPassword ? <EyeOff size={28}/>:<Eye size={28}/>}</button>
+          </div>
+
           {error && <p className='text-red-600 text-center text-sm'>{error}</p>}
+
           <button type='submit' disabled={submitting} className='bg-blue-600 border rounded-xl px-3 py-2 text-white font-semibold my-2 hover:bg-blue-800'>
             {submitting ? 'Logging in..':'Login'}
           </button>

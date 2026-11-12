@@ -1,3 +1,5 @@
+const fs = require('fs/promises');
+const path = require('path');
 const getMyProfile = async(req,res)=>{
     try{
         const user = req.user;

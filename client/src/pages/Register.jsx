@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useNavigate,Link } from 'react-router-dom';
 import { registerUser } from '../api/authApi';
+import { Eye, EyeOff } from 'lucide-react';
 
 const Register = () => {
 
@@ -16,6 +17,9 @@ const Register = () => {
   });
 
   const [confirmPassword, setConfirmPassword] = useState('')
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange= (e) =>{
     const {name,value} = e.target;
@@ -76,11 +80,23 @@ const Register = () => {
           <input type="email" name='email' placeholder='xyz@gmail.com' value={formData.email} onChange={handleChange} required
           className='border-1 border-gray-500 rounded-md h-[40px] px-2'/>
           <h3 className='font-semibold'>Password</h3>
-          <input type="password" name='password' placeholder='Minimum 8 characters' value={formData.password} onChange={handleChange} required
-          className='border-1 border-gray-500 rounded-md h-[40px] px-2'/>
+          <div className="relative">
+            <input type={showPassword?'text':'password'} name='password' placeholder='Minimum 8 characters' value={formData.password} onChange={handleChange} required
+            className='border-1 border-gray-500 rounded-md h-[40px] px-2 w-full'/>
+            <button type='button' onClick={()=>setShowPassword(!showPassword)}
+              className='absolute right-3 top-1/2 -translate-y-1/2'>
+              {showPassword? <EyeOff size={28}/>:<Eye size={28}/>}
+            </button>
+          </div>
           <h3 className='font-semibold'>Confirm Password</h3>
-          <input type="password" placeholder='Repeat your Password' value={confirmPassword} onChange={handleConfirmPassword} required
-          className='border-1 border-gray-500 rounded-md h-[40px] px-2'/>
+          <div className="relative">
+            <input type={showConfirmPassword?'text':'password'} placeholder='Repeat your Password' value={confirmPassword} onChange={handleConfirmPassword} required
+            className='border-1 border-gray-500 rounded-md h-[40px] px-2 w-full'/>
+            <button type='button' onClick={()=>setShowConfirmPassword(!showConfirmPassword)}
+              className='absolute right-3 top-1/2 -translate-y-1/2'>
+              {showConfirmPassword? <EyeOff size={28}/>:<Eye size={28}/>}
+            </button>
+          </div>
           {error && <p className='text-red-600 text-center text-sm'>{error}</p>}
           <button type='submit' disabled={submitting} className='bg-blue-600 border rounded-xl px-3 py-2 text-white font-semibold my-2 hover:bg-blue-800'>
             {submitting ? 'Creating account..':'Create account'}

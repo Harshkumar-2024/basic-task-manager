@@ -12,7 +12,7 @@ export const AuthProvider = ({children}) => {
         const checkAuth = async() => {
             try{
                 const response = await getCurrentUser();
-                setUser(response.data);
+                setUser(response.data.user);
             }catch(error){
                 setUser(null);
             }finally{
