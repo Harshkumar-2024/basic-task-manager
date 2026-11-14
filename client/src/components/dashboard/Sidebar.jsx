@@ -10,7 +10,6 @@ const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: House },
     { name: 'Profile', path: '/profile', icon: UserRound },
-    { name: 'Settings', path: '/settings', icon: Settings }
   ]
 
   const {logout} = useAuth();

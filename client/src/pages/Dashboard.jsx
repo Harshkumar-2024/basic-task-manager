@@ -1,8 +1,8 @@
-import React, { useEffect, useState,useCallback } from 'react'
+import React, { useEffect, useState,useCallback,useRef } from 'react'
 import Sidebar from '../components/dashboard/Sidebar'
 import { Search,Plus,Layers,Hourglass,CirclePlay,CircleCheck,TriangleAlert,Filter,ChevronDown,X } from 'lucide-react'
 import { useAuth } from '../context/AuthContext';
-import {getAllTask,createTask} from '../api/taskApi'
+import {getAllTask,createTask,searchTasks} from '../api/taskApi'
 import TaskTable from '../components/dashboard/TaskTable';
 
 
@@ -28,13 +28,25 @@ const Dashboard = () => {
 
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState('');
+
+  const [search, setSearch] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  const searchRef = useRef(null);
   
   const fetchTasks = useCallback(async() =>{
     try{
       setLoading(true);
       setError('');
 
-      const response = await getAllTask();
+      const response = await getAllTask(filters);
+
+      console.log('Applied filters:', filters);
+      console.log('Filtered tasks:', response.data.tasks);
+
       setTasks(response.data.tasks);
 
     }catch(error){
@@ -47,9 +59,57 @@ const Dashboard = () => {
   useEffect(()=>{
     fetchTasks();
   },[filters]);
+
+  useEffect(() => {
+
+    if (!search.trim()) {
+        setSearchResults([]);
+        setSuggestions([]);
+        setSearchLoading(false);
+        return;
+    }
+
+    const timer = setTimeout(async () => {
+        try {
+            setSearchLoading(true);
+
+            const response = await searchTasks(search.trim());
+
+            setSearchResults(response.data.tasks);
+            setSuggestions(response.data.suggestions);
+
+        } catch (error) {
+            console.log('Search error:', error);
+            setSearchResults([]);
+            setSuggestions([]);
+        } finally {
+            setSearchLoading(false);
+        }
+    }, 300);
+
+    return () => clearTimeout(timer);
+
+  }, [search]);
+
+  useEffect(() => {
+
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+          setShowSuggestions(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+
+  }, []);
   
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  const minDueDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
   
   const summaryItems = [
     {
@@ -132,13 +192,73 @@ const Dashboard = () => {
           <div className="h-[72px] bg-white flex items-center justify-between px-8">
 
               {/* Search bar */}
-              <div className='relative max-w-md'>
+              <div className='relative max-w-md' ref={searchRef}>
                 <Search size={20} className='absolute left-3 top-1/2 -translate-y-2.5 text-[var(--color-muted)]'/>
                 <input
                   type="text"
                   placeholder="Search tasks..."
+                  value = {search}
+                  onChange={(e) =>{
+                    setSearch(e.target.value);
+                    setShowSuggestions(true);
+                  }} 
+                  
                   className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-[var(--color-border)] outline-none focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 transition-all"
                 />
+                {showSuggestions && search.trim() && (
+                  <div className="absolute top-full left-0 w-full mt-2 bg-white border border-[var(--color-border)] rounded-xl shadow-lg z-50 overflow-hidden">
+
+                    {/* Dropdown Header */}
+                    <div className="px-4 py-3 border-b border-[var(--color-border)]">
+                      <p className="text-xs font-semibold text-[var(--color-muted)] uppercase tracking-wider">
+                        Task Suggestions
+                      </p>
+                    </div>
+
+                    {/* Suggestions */}
+                    {searchLoading ? (
+                      <p className="px-4 py-4 text-sm text-[var(--color-muted)]">
+                        Searching...
+                      </p>
+                    ) : suggestions.length > 0 ? (
+                      suggestions.slice(0, 5).map((item) => (
+                        <button
+                          key={item._id}
+                          type="button"
+                          onClick={() => {
+                            setSearch(item.title);
+                            setShowSuggestions(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-3 text-left text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition-colors"
+                        >
+                          <Search
+                            size={16}
+                            className="text-[var(--color-muted)] shrink-0"
+                          />
+
+                          <span className="truncate font-medium">
+                            {item.title}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-4 py-4 text-sm text-[var(--color-muted)]">
+                        No matching tasks found
+                      </p>
+                    )}
+
+                    {/* Footer */}
+                    {!searchLoading && suggestions.length > 0 && (
+                      <div className="px-4 py-2 border-t border-[var(--color-border)]">
+                        <p className="text-xs text-[var(--color-muted)]">
+                          {suggestions.length} suggestions
+                        </p>
+                      </div>
+                    )}
+
+                  </div>
+                )}
+              
               </div>
 
               {/* Profile */}
@@ -313,7 +433,7 @@ const Dashboard = () => {
 
           </div>
 
-          <TaskTable tasks={tasks} onRefresh={fetchTasks}/>
+          <TaskTable tasks={search.trim() ? searchResults:tasks} onRefresh={fetchTasks}/>
 
           {/* Create Task Modal */}
           {showCreateModal && (
@@ -425,6 +545,7 @@ const Dashboard = () => {
                               <input
                                   type="date"
                                   value={newTask.dueDate}
+                                  min = {minDueDate}
                                   onChange={(e) => setNewTask({
                                       ...newTask,
                                       dueDate: e.target.value

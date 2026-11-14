@@ -92,6 +92,54 @@ const createTask = async(req,res)=>{
     }
 };
 
+// Search tasks by title
+const searchTasks = async (req, res) => {
+    try {
+        const { query } = req.query;
+
+        // Validate search query
+        if (!query || !query.trim()) {
+            return res.status(200).json({
+                message: 'Please enter a search query',
+                count: 0,
+                tasks: [],
+                suggestions: [],
+            });
+        }
+
+        // Escape special regex characters
+        const escapedQuery = query.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+        // Search only tasks belonging to the logged-in user
+        const tasks = await Task.find({
+            user: req.user._id,
+            title: { $regex: escapedQuery, $options: 'i' },
+        }).sort({
+            createdAt: -1,
+        });
+
+        // Return first 5 task titles as suggestions
+        const suggestions = tasks.slice(0, 5).map(task => ({
+            _id: task._id,
+            title: task.title,
+        }));
+
+        return res.status(200).json({
+            message: 'Tasks searched successfully',
+            count: tasks.length,
+            tasks,
+            suggestions,
+        });
+
+    } catch (error) {
+        console.log('Search tasks error:', error.message);
+
+        return res.status(500).json({
+            message: 'Something went wrong while searching tasks',
+        });
+    }
+};
+
 // Partially update an existing task
 const updateTask = async (req, res) => {
     try {
@@ -418,4 +466,4 @@ const getTaskById = async(req,res)=>{
     }
 }
 
-module.exports = {createTask, updateTask,deleteTask ,getTasks ,getTaskById};
+module.exports = {createTask, updateTask,deleteTask ,getTasks ,getTaskById,searchTasks};

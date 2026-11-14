@@ -7,7 +7,13 @@ const getTimezoneConfig = () => ({
 });
 
 export const getAllTask=(filter = {})=>{
-    return api.get('/tasks',{...getTimezoneConfig(),params:filter});
+    const params = {};
+
+    if(filter.status) params.status = filter.status;
+    if(filter.priority) params.priority = filter.priority;
+    if(filter.dueDate) params.dueDate = filter.dueDate;
+
+    return api.get('/tasks',{...getTimezoneConfig(),params});
 }
 
 export const getTaskById =(id)=>{
@@ -25,6 +31,10 @@ export const updateTask =(id,data)=>{
 export const createTask =(data)=>{
     return api.post('/tasks/create',data,getTimezoneConfig());
 }
+
+export const searchTasks = (query) =>{
+    return api.get('/tasks/search',{params:{query}});
+};
 
 
 
