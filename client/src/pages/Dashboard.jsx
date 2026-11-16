@@ -1,6 +1,6 @@
 import React, { useEffect, useState,useCallback,useRef } from 'react'
 import Sidebar from '../components/dashboard/Sidebar'
-import { Search,Plus,Layers,Hourglass,CirclePlay,CircleCheck,TriangleAlert,Filter,ChevronDown,X } from 'lucide-react'
+import { Search,Plus,Layers,Hourglass,CirclePlay,CircleCheck,TriangleAlert,Filter,ChevronDown,X,UserRound } from 'lucide-react'
 import { useAuth } from '../context/AuthContext';
 import {getAllTask,createTask,searchTasks} from '../api/taskApi'
 import TaskTable from '../components/dashboard/TaskTable';
@@ -183,16 +183,17 @@ const Dashboard = () => {
     }
   }
 
+
   return (
     <div>
-      <div className="flex">
+      <div className="ml-0 md:ml-64 flex-1 min-w-0 pt-16 md:pt-0">
         <Sidebar/>
         <div className="flex-1 flex-col ">
           {/* search bar header */}
-          <div className="h-[72px] bg-white flex items-center justify-between px-8">
+          <div className="min-h-[72px] bg-white px-4 flex flex-wrap items-center justify-between md:px-8 py-3">
 
               {/* Search bar */}
-              <div className='relative max-w-md' ref={searchRef}>
+              <div className='relative w-full sm:max-w-md sm:flex-1' ref={searchRef}>
                 <Search size={20} className='absolute left-3 top-1/2 -translate-y-2.5 text-[var(--color-muted)]'/>
                 <input
                   type="text"
@@ -262,23 +263,28 @@ const Dashboard = () => {
               </div>
 
               {/* Profile */}
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full overflow-hidden">
+              <div className="flex items-center gap-2 shrink-0 mt-2 sm:mt-0">
+
+                
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--color-secondary)] flex items-center justify-center">
+
                   <img
-                    //src={user?.profilePic}
-                  src={user?.profilePic ? `http://localhost:3000${user.profilePic}` : ''}
-                  alt="profile" className='w-full h-full object-cover'
-                  onLoad={() => console.log('Image loaded successfully')}
-                  onError={(e) => console.log('Image failed:', e)}
-                    />
+                    src={`http://localhost:3000${user?.profilePic || '/default.jpg'}`}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+
                 </div>
 
-                <h1 className="font-semibold text-[var(--color-text)] whitespace-nowrap">{user?.fullname}</h1>
+                <h1 className="font-semibold text-[var(--color-text)] whitespace-nowrap">
+                  {user?.fullname}
+                </h1>
+
               </div>
 
           </div>
           {/* welcomeback section */}
-          <div className="py-5 px-6  border border-[var(--color-border)] rounded-md mx-6 my-4 flex justify-between shadow-[var(--shadow-card)] ">
+          <div className="py-5 px-6  border border-[var(--color-border)] rounded-md mx-6 my-4 flex flex-col sm:flex-row sm:items-center justify-between shadow-[var(--shadow-card)] ">
             {/* welcome message */}
             <div className="">
               <h1 className='text-3xl font-semibold text-[var(--color-text)]'>Welcome back,{user?.fullname}!</h1>

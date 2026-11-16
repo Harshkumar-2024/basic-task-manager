@@ -28,9 +28,9 @@ export const AuthProvider = ({children}) => {
 
         const response = await getCurrentUser();
 
-        setUser(response.data);
+        setUser(response.data.user);
 
-        return response.data;
+        return response.data.user;
     }
 
     const logout = async () => {

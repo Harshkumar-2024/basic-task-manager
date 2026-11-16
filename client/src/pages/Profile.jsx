@@ -90,7 +90,7 @@ const Profile = () => {
 
   return (
     <div className="min-h-screen bg-[var(--color-secondary)]">
-      <div className="flex">
+      <div className="ml-0 md:ml-64 flex-1 min-w-0 pt-16 md:pt-0">
 
         {/* Sidebar */}
         <Sidebar />

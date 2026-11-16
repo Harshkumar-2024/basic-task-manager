@@ -132,7 +132,7 @@ const TaskTable = ({tasks,onRefresh}) => {
   return (
     <div>
        {/* Task container */}
-        <div className="mb-3 bg-white rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-card)] overflow-x-auto mx-5">
+        <div className="mb-3 bg-white rounded-xl border border-[var(--color-border)] shadow-[var(--shadow-card)] overflow-x-auto mx-2 sm:mx-5">
 
             {/* Header */}
             <div className="grid grid-cols-[1.2fr_1.8fr_0.8fr_1.1fr_1fr_0.9fr] min-w-[850px] rounded-lg bg-[var(--color-secondary)]">
