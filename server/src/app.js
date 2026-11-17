@@ -11,7 +11,7 @@ const userRoutes = require('./routes/userRoutes');
 
 const allowedOrigins = [
     'http://localhost:5173',
-    'https://basic-task-manager-nj2qspndi-harsh-cb89.vercel.app'
+    'https://basic-task-manager-nine.vercel.app'
 ];
 
 app.use(cors({
