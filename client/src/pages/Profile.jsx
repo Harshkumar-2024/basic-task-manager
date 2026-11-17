@@ -116,18 +116,17 @@ const Profile = () => {
                 {/* Profile Picture */}
                 <div className="relative w-40 h-40 rounded-full overflow-hidden bg-[var(--color-secondary)] border-4 border-white shadow-lg ring-1 ring-[var(--color-border)]">
 
-                  {preview || user?.profilePic ? (
-                     <img
-                        src={
-                            preview ||
-                            `http://localhost:3000${user.profilePic}`
-                        }
-                        alt="Profile"
-                        className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <UserRound className="w-full h-full p-9 text-[var(--color-muted)]" />
-                  )}
+                  
+                {preview || user?.profilePic ? (
+                  <img
+                    src={preview || user.profilePic}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <UserRound className="w-full h-full p-9 text-[var(--color-muted)]" />
+                )}
+
 
                 </div>
 

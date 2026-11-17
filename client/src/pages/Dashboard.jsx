@@ -44,9 +44,6 @@ const Dashboard = () => {
 
       const response = await getAllTask(filters);
 
-      console.log('Applied filters:', filters);
-      console.log('Filtered tasks:', response.data.tasks);
-
       setTasks(response.data.tasks);
 
     }catch(error){
@@ -58,7 +55,7 @@ const Dashboard = () => {
 
   useEffect(()=>{
     fetchTasks();
-  },[filters]);
+  },[fetchTasks]);
 
   useEffect(() => {
 
@@ -79,7 +76,6 @@ const Dashboard = () => {
             setSuggestions(response.data.suggestions);
 
         } catch (error) {
-            console.log('Search error:', error);
             setSearchResults([]);
             setSuggestions([]);
         } finally {
@@ -175,7 +171,6 @@ const Dashboard = () => {
 
       await fetchTasks();
     }catch(error){
-      console.log('Create task error:',error.response?.data||error);
 
       setCreateError(error.response?.data?.message || 'Failed to create task');
     } finally{
@@ -267,13 +262,12 @@ const Dashboard = () => {
 
                 
                 <div className="w-10 h-10 rounded-full overflow-hidden bg-[var(--color-secondary)] flex items-center justify-center">
-
-                  <img
-                    src={`http://localhost:3000${user?.profilePic || '/default.jpg'}`}
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-
+                  {user?.profilePic ? (
+                    <img src={user.profilePic}
+                      alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <UserRound className="w-6 h-6 text-[var(--color-muted)]" />
+                  )}
                 </div>
 
                 <h1 className="font-semibold text-[var(--color-text)] whitespace-nowrap">

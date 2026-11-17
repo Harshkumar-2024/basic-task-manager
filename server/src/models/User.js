@@ -21,7 +21,7 @@ const userSchema = mongoose.Schema(
     },
     profilePic:{
         type:String,
-        default:'/default.jpg',
+        default:'profile-images/default.jpg',
     },
     tasks:[
         {

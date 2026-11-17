@@ -1,7 +1,6 @@
 const express = require('express');
 const app = express();
 const cookieParser = require('cookie-parser');
-const path = require('path');
 const cors = require('cors');
 
 const authMiddleware = require('./middleware/authMiddleware');
@@ -23,9 +22,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // cookie parser
 app.use(cookieParser());
-
-app.use('/uploads',express.static(path.join(__dirname,'../uploads')))
-app.use(express.static(path.join(__dirname,'public')));
 
 app.get('/',(req,res)=>{
     res.send('Basic Task Manager API is running');

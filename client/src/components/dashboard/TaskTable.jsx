@@ -93,9 +93,6 @@ const TaskTable = ({tasks,onRefresh}) => {
             }
 
         } catch (error) {
-            console.log('Update error:', error);
-            console.log('Response status:', error.response?.status);
-            console.log('Response data:', error.response?.data);
             setError(error.response?.data?.message || 'Failed to update task');
         } finally {
             setSaving(false);
@@ -122,7 +119,6 @@ const TaskTable = ({tasks,onRefresh}) => {
             }
 
         } catch (error) {
-            //console.log('Delete error:', error.response?.data || error);
             setError(error.response?.data?.message || 'Failed to delete task');
         } finally {
             setDeleting(false);
