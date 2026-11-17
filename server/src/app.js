@@ -9,9 +9,14 @@ const authRoutes = require('./routes/authRoutes');
 const taskRoutes = require('./routes/taskRoutes');
 const userRoutes = require('./routes/userRoutes');
 
+const allowedOrigins = [
+    'http://localhost:5173',
+    'https://basic-task-manager-nine.vercel.app'
+];
+
 app.use(cors({
-    origin:'http://localhost:5173',
-    credentials:true,
+    origin: allowedOrigins,
+    credentials: true,
 }));
 
 // Middleware to parse JSON request bodies
