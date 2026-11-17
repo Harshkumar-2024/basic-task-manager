@@ -65,12 +65,12 @@ const registerUser = async (req, res) => {
 
         const token = generateToken(user._id);
 
-        res.cookie('token',token,{
-            httpOnly:true,
-            secure:process.env.NODE_ENV === 'production',
-            sameSite:'lax',
-            maxAge:24*60*60*1000,
-            path:'/',
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+            maxAge: 24 * 60 * 60 * 1000,
+            path: '/',
         });
 
         return res.status(201).json({
@@ -165,7 +165,7 @@ const logoutUser = async (req, res) => {
         res.clearCookie('token', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
+            sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
             path: '/',
         });
 
